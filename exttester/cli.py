@@ -28,121 +28,63 @@ def gui():
 
 @cli.command()
 @click.argument('path', type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option('--browser', type=click.Choice(['chrome', 'firefox', 'edge', 'opera', 'all'], case_sensitive=False), 
-              default='all', help='Browser to test for (default: all)')
-def test(path, browser):
-    """Test a single extension folder"""
+@click.option('--browser', 'browsers', multiple=True,
+              type=click.Choice(['chrome', 'firefox', 'edge', 'opera', 'all'], case_sensitive=False),
+              default=('all',), help='Browser to test for (default: all)')
+def test(path, browsers):
+    """Test a single extension (Full Pipeline)"""
     ext_path = Path(path)
-
-    if browser.lower() == 'all':
-        browsers = [BrowserType.CHROME, BrowserType.FIREFOX, BrowserType.EDGE, BrowserType.OPERA]
+    
+    # Map 'all' to concrete list
+    if 'all' in browsers:
+        target_browsers = ['chrome', 'firefox', 'edge']
     else:
-        browser_map = {
-            'chrome': BrowserType.CHROME,
-            'firefox': BrowserType.FIREFOX,
-            'edge': BrowserType.EDGE,
-            'opera': BrowserType.OPERA
-        }
-        browsers = [browser_map[browser.lower()]]
+        target_browsers = list(browsers)
 
-    click.echo(f"\n{'='*70}")
-    click.echo(f"Testing Extension: {ext_path.name}")
-    click.echo(f"Browsers: {', '.join(browsers)}")
-    click.echo(f"{'='*70}\n")
+    click.echo(f"Starting detailed test pipeline for: {ext_path.name}")
+    click.echo(f"Browsers: {', '.join(target_browsers)}")
 
-    for target_browser in browsers:
-        click.secho(f"\n[*] Testing for {target_browser}:", bold=True)
-        validator = ExtensionValidator(target_browser)
-        is_valid, errors, warnings = validator.validate_extension(str(ext_path), target_browser)
-        compatible = validator.detected_browsers
-
-        if is_valid:
-            click.secho("[OK] Status: VALID", fg='green', bold=True)
-        else:
-            click.secho("[FAIL] Status: INVALID", fg='red', bold=True)
-
-        if compatible:
-            click.secho(f"     Compatible with: {', '.join(compatible)}", fg='cyan')
-
-        if errors:
-            click.secho(f"\n     Errors ({len(errors)}):", fg='red', bold=True)
-            for i, error in enumerate(errors, 1):
-                click.echo(f"       {i}. {error}")
-
-        if warnings:
-            click.secho(f"\n     Warnings ({len(warnings)}):", fg='yellow', bold=True)
-            for i, warning in enumerate(warnings, 1):
-                click.echo(f"       {i}. {warning}")
-
-        if not errors and not warnings:
-            click.secho("\n     [OK] No issues found!", fg='green')
-
-    click.echo(f"\n{'='*70}\n")
-
+    from .pipeline import TestingPipeline, PipelineReporter
+    
+    pipeline = TestingPipeline(str(ext_path), target_browsers)
+    results = pipeline.run()
+    
+    click.echo(PipelineReporter.get_summary(results))
+    
+    if not results['summary']['success']:
+        click.get_current_context().exit(1)
+@cli.command()
+@click.argument('path', type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.option('--browser', 'browsers', multiple=True,
+              type=click.Choice(['chrome', 'firefox', 'edge', 'opera', 'all'], case_sensitive=False),
+              default=('all',), help='Browsers to test (default: all)')
+@click.option('--report-dir', default='reports', show_default=True,
+              help='Directory to write reports (JSON/HTML/CSV/PDF)')
+@click.option('--runtime/--no-runtime', default=True, help='Run runtime browser tests (Playwright)')
+def scan(path, browsers, report_dir, runtime):
+    """Scan a folder of extensions (Bulk Test)"""
+    _run_bulk(path, browsers, report_dir, runtime, ())
 
 @cli.command()
 @click.argument('path', type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option('--browser', type=click.Choice(['chrome', 'firefox', 'edge', 'opera', 'all'], case_sensitive=False),
-              default='all', help='Browser to test for (default: all)')
-def test_all(path, browser):
-    """Test all extensions in a directory"""
-    dir_path = Path(path)
+@click.option('--browser', 'browsers', multiple=True,
+              type=click.Choice(['chrome', 'firefox', 'edge', 'opera', 'all'], case_sensitive=False),
+              default=('all',), help='Browsers to test (default: all)')
+@click.option('--report-dir', default='reports', show_default=True,
+              help='Directory to write reports (JSON/HTML/CSV/PDF)')
+@click.option('--runtime', is_flag=True, help='Run runtime browser tests')
+def bulk(path, browsers, report_dir, runtime):
+    """Bulk test all extensions (Alias for scan)"""
+    _run_bulk(path, browsers, report_dir, runtime, ())
 
-    if browser.lower() == 'all':
-        browsers = [BrowserType.CHROME, BrowserType.FIREFOX, BrowserType.EDGE, BrowserType.OPERA]
-    else:
-        browser_map = {
-            'chrome': BrowserType.CHROME,
-            'firefox': BrowserType.FIREFOX,
-            'edge': BrowserType.EDGE,
-            'opera': BrowserType.OPERA
-        }
-        browsers = [browser_map[browser.lower()]]
-
-    click.echo(f"\n{'='*70}")
-    click.echo(f"Testing All Extensions in: {dir_path}")
-    click.echo(f"Browsers: {', '.join(browsers)}")
-    click.echo(f"{'='*70}\n")
-
-    results = validate_all_extensions(str(dir_path))
-
-    if not results:
-        click.secho("No extensions found in directory.", fg='yellow')
-        return
-
-    total = len(results)
-    valid = sum(1 for _, (is_valid, _, _) in results.items() if is_valid)
-    total_errors = sum(len(errors) for _, (_, errors, _) in results.items())
-    total_warnings = sum(len(warnings) for _, (_, _, warnings) in results.items())
-
-    click.secho(f"\nTotal Extensions: {total}", bold=True)
-    click.secho(f"Valid Extensions: {valid}", fg='green')
-    click.secho(f"Total Errors: {total_errors}", fg='red')
-    click.secho(f"Total Warnings: {total_warnings}", fg='yellow')
-
-    click.echo(f"\n{'-'*70}\n")
-    for ext_name in sorted(results.keys()):
-        is_valid, errors, warnings = results[ext_name]
-
-        if is_valid:
-            click.secho(f"[OK] {ext_name}", fg='green', bold=True)
-        else:
-            click.secho(f"[FAIL] {ext_name}", fg='red', bold=True)
-
-        if errors:
-            for error in errors:
-                click.secho(f"      [FAIL] {error}", fg='red')
-
-        if warnings:
-            for warning in warnings:
-                click.secho(f"      [WARN] {warning}", fg='yellow')
-
-        if not errors and not warnings:
-            click.echo("      No issues found")
-
-        click.echo()
-
-    click.echo(f"{'='*70}\n")
+@cli.command()
+@click.argument('path', type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.option('--browser', 'browsers', multiple=True,
+              type=click.Choice(['chrome', 'firefox', 'edge', 'opera', 'all'], case_sensitive=False),
+              default=('all',), help='Browsers to test (default: all)')
+def test_all(path, browsers):
+    """Test all extensions in a directory (Alias for scan)"""
+    _run_bulk(path, browsers, 'reports', True, ())
 
 
 def _run_bulk(path, browsers, report_dir, runtime, urls):
@@ -171,32 +113,6 @@ def _run_bulk(path, browsers, report_dir, runtime, urls):
     if outputs.get("pdf"):
         click.echo(f"  PDF:  {outputs['pdf']}")
 
-
-@cli.command()
-@click.argument('path', type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option('--browser', 'browsers', multiple=True,
-              type=click.Choice(['chrome', 'firefox', 'edge', 'opera', 'all'], case_sensitive=False),
-              default=('all',), help='Browsers to test (default: all)')
-@click.option('--report-dir', default='reports', show_default=True,
-              help='Directory to write reports (JSON/HTML/CSV/PDF)')
-@click.option('--runtime', is_flag=True, help='Run runtime browser tests (Playwright required)')
-@click.option('--urls', multiple=True, default=('https://www.google.com', 'https://www.github.com'),
-              show_default=True, help='Test URLs for runtime mode')
-def bulk(path, browsers, report_dir, runtime, urls):
-    """Bulk test all extensions under a root folder"""
-    _run_bulk(path, browsers, report_dir, runtime, urls)
-
-
-@cli.command()
-@click.argument('path', type=click.Path(exists=True, file_okay=False, dir_okay=True))
-@click.option('--browser', 'browsers', multiple=True,
-              type=click.Choice(['chrome', 'firefox', 'edge', 'opera', 'all'], case_sensitive=False),
-              default=('all',), help='Browsers to test (default: all)')
-@click.option('--report-dir', default='reports', show_default=True,
-              help='Directory to write reports (JSON/HTML/CSV/PDF)')
-def scan(path, browsers, report_dir):
-    """Scan a folder of extensions and generate reports"""
-    _run_bulk(path, browsers, report_dir, False, ())
 
 
 @cli.command()

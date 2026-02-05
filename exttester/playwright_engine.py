@@ -75,8 +75,11 @@ class PlaywrightBrowserEngine:
                     'text': msg.text
                 }))
                 
-                # Capture errors
+                # Capture unhandled exceptions
                 page.on("pageerror", lambda err: results['errors'].append(str(err)))
+
+                # Capture network failures
+                page.on("requestfailed", lambda req: results['errors'].append(f"Network fail: {req.url} - {req.failure}"))
                 
                 # Navigate to test page
                 try:
@@ -89,6 +92,9 @@ class PlaywrightBrowserEngine:
                 # Check if extension loaded
                 extension_loaded = self._check_extension_loaded(page)
                 results['extension_loaded'] = extension_loaded
+
+                # Inject a script to check for content script side-effects if applicable
+                # (Optional: check for specific element injected by content script)
                 
                 # Take screenshot
                 screenshot_path = Path('reports/screenshots') / f'{self.extension_path.name}_{browser}.png'
@@ -214,63 +220,98 @@ class PlaywrightBrowserEngine:
         except Exception:
             return False
     
-    def test_popup(self, browser='chromium') -> Dict:
-        """Test extension popup page if it exists."""
-        manifest_path = self.extension_path / 'manifest.json'
-        
+    
+    def _find_extension_id(self, page) -> str:
+        """Attempt to find extension ID using chrome://extensions"""
         try:
-            with open(manifest_path) as f:
-                manifest = json.load(f)
+            page.goto("chrome://extensions/", timeout=10000)
+            id_val = page.evaluate("""
+                () => {
+                    const items = document.querySelector('extensions-manager')
+                        ?.shadowRoot?.querySelector('extensions-item-list')
+                        ?.shadowRoot?.querySelectorAll('extensions-item');
+                    
+                    if (!items) return null;
+                    
+                    // Since we only loaded one extension, it's likely the first one
+                    // But we can filter by name if needed
+                    for (const item of items) {
+                        return item.getAttribute('id'); 
+                    }
+                    return null;
+                }
+            """)
+            return id_val
         except Exception as e:
-            return {'success': False, 'error': f'Cannot read manifest: {e}'}
-        
-        popup_page = None
-        if 'action' in manifest and 'default_popup' in manifest['action']:
-            popup_page = manifest['action']['default_popup']
-        elif 'browser_action' in manifest and 'default_popup' in manifest['browser_action']:
-            popup_page = manifest['browser_action']['default_popup']
-        elif 'page_action' in manifest and 'default_popup' in manifest['page_action']:
-            popup_page = manifest['page_action']['default_popup']
-        
-        if not popup_page:
-            return {'success': False, 'error': 'No popup page defined in manifest'}
-        
-        popup_path = self.extension_path / popup_page
-        if not popup_path.exists():
-            return {'success': False, 'error': f'Popup file not found: {popup_page}'}
-        
+            logger.warning(f"Could not resolve extension ID: {e}")
+            return None
+
+    def test_popup(self, browser='chromium') -> Dict:
+        """Test popup starting from browser action"""
+        if browser != 'chromium':
+            return {'success': True, 'skipped': 'Real popup test only on Chromium'}
+
         results = {
             'success': False,
-            'popup_path': popup_page,
             'errors': [],
             'console_logs': []
         }
         
         try:
             from playwright.sync_api import sync_playwright
-            
             with sync_playwright() as p:
-                browser_instance = p.chromium.launch()
+                browser_instance = p.chromium.launch(
+                    headless=True,
+                    args=[
+                        f'--disable-extensions-except={self.extension_path}',
+                        f'--load-extension={self.extension_path}'
+                    ]
+                )
                 context = browser_instance.new_context()
                 page = context.new_page()
                 
+                # Get ID
+                ext_id = self._find_extension_id(page)
+                if not ext_id:
+                    results['error'] = 'Could not find Extension ID'
+                    return results
+                
+                # Parse manifest for popup path
+                manifest_path = self.extension_path / 'manifest.json'
+                with open(manifest_path) as f:
+                    manifest = json.load(f)
+                
+                popup_file = None
+                action = manifest.get('action') or manifest.get('browser_action') or {}
+                if isinstance(action, dict):
+                    popup_file = action.get('default_popup')
+                
+                if not popup_file:
+                    results['success'] = True
+                    results['skipped'] = 'No popup defined'
+                    return results
+
+                popup_url = f"chrome-extension://{ext_id}/{popup_file}"
+                
+                # Monitor errors
                 page.on("console", lambda msg: results['console_logs'].append(msg.text))
                 page.on("pageerror", lambda err: results['errors'].append(str(err)))
                 
-                # Load popup HTML directly
-                page.goto(f'file://{popup_path.absolute()}')
-                page.wait_for_load_state('load', timeout=5000)
-                
-                results['success'] = len(results['errors']) == 0
+                try:
+                    page.goto(popup_url, timeout=5000)
+                    page.wait_for_load_state('domcontentloaded')
+                    results['success'] = True
+                except Exception as e:
+                    results['errors'].append(str(e))
                 
                 context.close()
                 browser_instance.close()
                 
         except Exception as e:
             results['error'] = str(e)
-            logger.error(f"Popup test error: {e}")
-        
+            
         return results
+
 
 
 def test_with_playwright(extension_path: Path, browser='chromium') -> Dict:

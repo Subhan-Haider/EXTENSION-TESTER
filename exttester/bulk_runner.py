@@ -53,7 +53,24 @@ def run_bulk_tests(
         meta = _collect_extension_metadata(ext_path)
         performance = collect_metrics(ext_path)
         security = scan_extension(ext_path)
-        print(f"\n[{i}/{total}] Testing {ext_name}")
+        # Calculate scores immediately for console feedback
+        risk_score = security.get('score', 100)
+        risk_label = "Low" if risk_score >= 85 else "Medium" if risk_score >= 60 else "High"
+        
+        print(f"\n{'='*60}")
+        print(f"🔎 Testing [{i}/{total}]: {ext_name}")
+        print(f"{'='*60}")
+        print(f"   • Version: {meta.get('version', '?')}")
+        print(f"   • Manifest V{meta.get('manifest_version', '?')}")
+        print(f"   • Size: {meta.get('size_mb', 0)} MB ({meta.get('file_count', 0)} files)")
+        
+        # Security Snapshot
+        sec_color = "\033[92m" if risk_score > 80 else "\033[93m" if risk_score > 60 else "\033[91m"
+        print(f"   • Security Score: {sec_color}{risk_score}/100\033[0m ({risk_label} Risk)")
+        
+        if security.get('findings'):
+            print(f"   • \033[93mSecurity Issues found: {len(security['findings'])}\033[0m")
+
         report["extensions"][ext_name] = {
             "path": ext_path,
             "meta": meta,
@@ -63,9 +80,12 @@ def run_bulk_tests(
         }
 
         for browser in browsers:
-            print(f"   - {browser}")
             validator = ExtensionValidator(browser)
             is_valid, errors, warnings = validator.validate_extension(ext_path, browser)
+            
+            status_icon = "✅" if is_valid else "❌"
+            print(f"   • {browser.title()}: {status_icon} {'PASS' if is_valid else 'FAIL'}")
+            
             report["extensions"][ext_name]["browsers"][browser] = {
                 "valid": is_valid,
                 "errors": errors,

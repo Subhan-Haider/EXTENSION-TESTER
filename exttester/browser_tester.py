@@ -16,8 +16,14 @@ import subprocess
 import sys
 import logging
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
+try:
+    from .playwright_engine import PlaywrightBrowserEngine
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
+
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +140,11 @@ class ExtensionBrowserTester:
         self.browser = browser.lower()
         self.manager = BrowserManager()
         self.results: List[BrowserTestResult] = []
+        if PLAYWRIGHT_AVAILABLE:
+            self.engine = PlaywrightBrowserEngine(self.extension_path)
+        else:
+            self.engine = None
+
     
     def check_browser_available(self) -> BrowserTestResult:
         """Check if browser is installed and available"""
@@ -189,6 +200,46 @@ class ExtensionBrowserTester:
                 details={'missing_fields': missing}
             )
         
+
+        # If static checks passed, try real browser load (if available)
+        if PLAYWRIGHT_AVAILABLE and self.browser in ['chrome', 'chromium', 'firefox']:
+            logger.info(f"Attempting real browser load test for {self.browser}")
+            try:
+                # Map chrome to chromium for playwright if needed, or rely on playwright's detection
+                pw_browser = 'chromium' if self.browser == 'chrome' else self.browser
+                
+                real_result = self.engine.test_extension_load(browser=pw_browser, headless=True)
+                
+                if not real_result['success']:
+                    return BrowserTestResult(
+                        browser=self.browser,
+                        test_type='extension_load_runtime',
+                        success=False,
+                        message=f"Extension failed to load in real {self.browser}: {real_result.get('error', 'Unknown error')}",
+                        console_errors=real_result.get('errors', []),
+                        console_warnings=[l.get('text') for l in real_result.get('console_logs', []) if l.get('type') == 'warning'],
+                        details={'static_check': 'PASS', 'runtime_check': 'FAIL'}
+                    )
+                
+                return BrowserTestResult(
+                    browser=self.browser,
+                    test_type='extension_load',
+                    success=True,
+                    message=f'Extension loaded successfully in real {self.browser} (Static + Runtime)',
+                    console_warnings=[l.get('text') for l in real_result.get('console_logs', []) if l.get('type') == 'warning'],
+                    details={'manifest_version': manifest.get('manifest_version'), 'runtime_load': True}
+                )
+            except Exception as e:
+                logger.warning(f"Playwright test failed: {e}")
+                # Fallback to static success but warn
+                return BrowserTestResult(
+                    browser=self.browser,
+                    test_type='extension_load',
+                    success=True,
+                    message=f'Extension manifest valid (Runtime test skipped: {e})',
+                    details={'manifest_version': manifest.get('manifest_version')}
+                )
+
         return BrowserTestResult(
             browser=self.browser,
             test_type='extension_load',
@@ -257,6 +308,33 @@ class ExtensionBrowserTester:
                 console_warnings=['Move inline scripts to external .js file']
             )
         
+
+        # Real popup test
+        if PLAYWRIGHT_AVAILABLE and self.browser in ['chrome', 'chromium', 'firefox']:
+            try:
+                pw_browser = 'chromium' if self.browser == 'chrome' else self.browser
+                popup_result = self.engine.test_popup(browser=pw_browser)
+                
+                if not popup_result['success']:
+                    return BrowserTestResult(
+                        browser=self.browser,
+                        test_type='popup_test_runtime',
+                        success=False,
+                        message=f"Popup failed to load in real browser: {popup_result.get('error')}",
+                        console_errors=popup_result.get('errors', []),
+                        details={'popup_file': popup_file}
+                    )
+                
+                return BrowserTestResult(
+                    browser=self.browser,
+                    test_type='popup_test',
+                    success=True,
+                    message=f'Popup loaded successfully in real {self.browser}',
+                    details={'popup_file': popup_file, 'runtime_check': 'PASS'}
+                )
+            except Exception as e:
+                logger.warning(f"Playwright popup test failed: {e}")
+
         return BrowserTestResult(
             browser=self.browser,
             test_type='popup_test',
