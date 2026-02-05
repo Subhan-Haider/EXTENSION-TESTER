@@ -2,10 +2,10 @@ import json
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from bulk_scanner import find_extensions
-from performance_metrics import collect_metrics
-from security_scanner import scan_extension
-from validator import ExtensionValidator, BrowserType
+from .bulk_scanner import find_extensions
+from .performance_metrics import collect_metrics
+from .security_scanner import scan_extension
+from .validator import ExtensionValidator, BrowserType
 
 
 BROWSER_MAP = {
@@ -74,7 +74,7 @@ def run_bulk_tests(
             }
 
         if run_runtime:
-            from runtime_tester import run_runtime_tests
+            from .runtime_tester import run_runtime_tests
             urls = test_urls or ["https://www.google.com", "https://www.github.com"]
             runtime = run_runtime_tests(
                 ext_path,

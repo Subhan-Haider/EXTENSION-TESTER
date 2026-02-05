@@ -11,10 +11,10 @@ from PyQt5.QtGui import QIcon, QColor, QFont, QPalette
 import os
 import html
 import webbrowser
-from report_generator import generate_reports
-from performance_metrics import collect_metrics
-from security_scanner import scan_extension
-from validator import ExtensionValidator, validate_all_extensions, BrowserType
+from .report_generator import generate_reports
+from .performance_metrics import collect_metrics
+from .security_scanner import scan_extension
+from .validator import ExtensionValidator, validate_all_extensions, BrowserType
 import logging
 
 # Setup logging
@@ -549,8 +549,9 @@ class BrowserExtensionTester(QMainWindow):
             paths = generate_reports(report, str(out_dir))
             self.last_report_paths = paths
             self.open_report_btn.setEnabled(True)
+            pdf_line = f"\nPDF: {paths['pdf']}" if paths.get("pdf") else ""
             QMessageBox.information(self, "Report Exported",
-                                    f"HTML: {paths['html']}\nJSON: {paths['json']}\nCSV: {paths['csv']}")
+                                    f"HTML: {paths['html']}\nJSON: {paths['json']}\nCSV: {paths['csv']}{pdf_line}")
             html_path = paths.get("html")
             if html_path and Path(html_path).exists():
                 webbrowser.open(Path(html_path).resolve().as_uri())

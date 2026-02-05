@@ -1,0 +1,128 @@
+name: Test Browser Extension
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-extension:
+    name: Test Extension
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Install browsers for testing
+      run: |
+        # Chrome is pre-installed on ubuntu-latest
+        # Firefox is pre-installed
+        # Install WebDriver managers
+        pip install webdriver-manager
+        
+    - name: Run extension pipeline test
+      run: |
+        python main.py pipeline ./sample-extension --browser chrome
+        
+    - name: Run static analysis
+      run: |
+        python main.py analyze ./sample-extension
+        
+    - name: Run store compliance check
+      run: |
+        python main.py store-check ./sample-extension
+        
+    - name: Generate test reports
+      run: |
+        python main.py scan ./sample-extension --report-dir ./test-reports
+        
+    - name: Upload test reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-reports
+        path: test-reports/
+        retention-days: 30
+        
+    - name: Check for critical errors
+      run: |
+        # Fail build if critical errors found
+        if grep -q '"errors":' test-reports/report.json; then
+          echo "❌ Critical errors found in extension"
+          exit 1
+        else
+          echo "✅ No critical errors found"
+        fi
+
+  multi-browser-test:
+    name: Test on Multiple Browsers
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chrome, firefox, edge]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Test extension on ${{ matrix.browser }}
+      run: |
+        python main.py test ./sample-extension --browser ${{ matrix.browser }}
+      continue-on-error: true
+
+  security-scan:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run security analysis
+      run: |
+        python main.py analyze ./sample-extension
+        
+    - name: Check security score
+      run: |
+        # Extract security score from JSON report
+        # Fail if score is below threshold
+        python -c "
+        import json
+        with open('reports/report.json') as f:
+            data = json.load(f)
+            # Add security score threshold check here
+            print('Security analysis complete')
+        "

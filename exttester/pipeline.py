@@ -68,10 +68,10 @@ class TestingPipeline:
         }
         
         # Import here to avoid circular imports
-        from validator import ExtensionValidator, BrowserType
-        from linter import ExtensionLinter
-        from browser_tester import ExtensionBrowserTester
-        from api_checker import APICompatibilityChecker
+        from .validator import ExtensionValidator, BrowserType
+        from .linter import ExtensionLinter
+        from .browser_tester import ExtensionBrowserTester
+        from .api_checker import APICompatibilityChecker
         
         # Stage 1: Static File Checks
         stage1 = self._run_stage(1, 'Static File Checks', 'Verify all required files exist',
@@ -187,8 +187,8 @@ class TestingPipeline:
     
     def _validate_manifest(self) -> Dict:
         """Stage 2: Manifest validation"""
-        from validator import ExtensionValidator, BrowserType
-        from store_checker import StoreComplianceChecker
+        from .validator import ExtensionValidator, BrowserType
+        from .store_checker import StoreComplianceChecker
         
         try:
             validator = ExtensionValidator(BrowserType.CHROME)
@@ -232,7 +232,7 @@ class TestingPipeline:
     
     def _lint_code(self) -> Dict:
         """Stage 3: Lint all code"""
-        from linter import ExtensionLinter
+        from .linter import ExtensionLinter
         from size_analyzer import ExtensionSizeAnalyzer
         from dependency_checker import DependencyChecker
         from network_analyzer import NetworkBehaviorAnalyzer
@@ -277,7 +277,7 @@ class TestingPipeline:
     
     def _browser_load_test(self, browser: str) -> Dict:
         """Stage 4: Browser load test"""
-        from browser_tester import ExtensionBrowserTester
+        from .browser_tester import ExtensionBrowserTester
         
         tester = ExtensionBrowserTester(str(self.extension_path), browser)
         result = tester.test_extension_load()
@@ -291,7 +291,7 @@ class TestingPipeline:
     
     def _runtime_behavior_test(self, browser: str) -> Dict:
         """Stage 5: Runtime behavior test"""
-        from browser_tester import ExtensionBrowserTester
+        from .browser_tester import ExtensionBrowserTester
         
         tester = ExtensionBrowserTester(str(self.extension_path), browser)
         test_results = tester.run_all_tests()
@@ -313,7 +313,7 @@ class TestingPipeline:
     
     def _compatibility_analysis(self) -> Dict:
         """Stage 6: Cross-browser compatibility"""
-        from api_checker import APICompatibilityChecker
+        from .api_checker import APICompatibilityChecker
         
         try:
             checker = APICompatibilityChecker(str(self.extension_path))

@@ -4,7 +4,8 @@ import shutil
 from pathlib import Path
 from typing import Dict, List
 
-from screenshotter import capture_static_screenshots
+from .screenshotter import capture_static_screenshots
+from .report_pdf import generate_pdf_report
 
 
 def generate_reports(report: Dict, out_dir: str) -> Dict[str, str]:
@@ -17,15 +18,21 @@ def generate_reports(report: Dict, out_dir: str) -> Dict[str, str]:
     json_path = out_path / "report.json"
     csv_path = out_path / "report.csv"
     html_path = out_path / "report.html"
+    pdf_path = out_path / "report.pdf"
 
     _write_json(report, json_path)
     _write_csv(report, csv_path)
     _write_html(report, html_path)
+    try:
+        generate_pdf_report(report, str(pdf_path))
+    except Exception:
+        pdf_path = None
 
     return {
         "json": str(json_path),
         "csv": str(csv_path),
         "html": str(html_path),
+        "pdf": str(pdf_path) if pdf_path else "",
     }
 
 

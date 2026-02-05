@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import Dict, List
 
-from privacy_scanner import PrivacyPolicyScanner
+from .privacy_scanner import PrivacyPolicyScanner
 
 
 class StoreComplianceChecker:
