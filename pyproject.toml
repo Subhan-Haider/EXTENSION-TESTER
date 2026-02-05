@@ -1,0 +1,145 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "exttester"
+version = "1.0.0"
+description = "Professional browser extension testing platform with real browser automation"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Subhan Haider", email = "subhan.haider@example.com"}
+]
+maintainers = [
+    {name = "Subhan Haider", email = "subhan.haider@example.com"}
+]
+keywords = [
+    "browser", "extension", "testing", "chrome", "firefox", "edge",
+    "automation", "playwright", "selenium", "quality-assurance",
+    "security", "vulnerability", "compliance", "webextension"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    "jsonschema>=4.21.1",
+    "click>=8.1.7",
+    "Pillow>=10.1.0",
+    "playwright>=1.41.2",
+    "reportlab>=4.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.21.1",
+    "pytest-timeout>=2.2.0",
+    "black>=23.12.1",
+    "flake8>=7.0.0",
+    "mypy>=1.8.0",
+    "bandit>=1.7.5",
+]
+gui = [
+    "PyQt5>=5.15.9",
+]
+all = [
+    "pytest>=7.4.3",
+    "PyQt5>=5.15.9",
+    "black>=23.12.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/Subhan-Haider/EXTENSION-TESTER"
+Documentation = "https://github.com/Subhan-Haider/EXTENSION-TESTER/blob/main/README.md"
+Repository = "https://github.com/Subhan-Haider/EXTENSION-TESTER"
+Issues = "https://github.com/Subhan-Haider/EXTENSION-TESTER/issues"
+Changelog = "https://github.com/Subhan-Haider/EXTENSION-TESTER/blob/main/CHANGELOG.md"
+
+[project.scripts]
+exttester = "main:main"
+
+[tool.setuptools]
+packages = ["exttester"]
+
+[tool.setuptools.package-data]
+exttester = ["*.json", "*.txt", "data/*"]
+
+[tool.black]
+line-length = 120
+target-version = ['py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | build
+  | dist
+  | __pycache__
+)/
+'''
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short --cov=exttester --cov-report=html --cov-report=term-missing"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+    "browser: marks tests that require real browser",
+]
+
+[tool.coverage.run]
+source = ["exttester"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = ["E203", "E501", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+]

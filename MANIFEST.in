@@ -1,0 +1,21 @@
+include README.md
+include LICENSE
+include CHANGELOG.md
+include requirements.txt
+include VERSION
+include pytest.ini
+include pyproject.toml
+
+recursive-include exttester *.py
+recursive-include exttester *.json
+recursive-include exttester *.txt
+
+recursive-exclude tests *
+recursive-exclude build *
+recursive-exclude dist *
+recursive-exclude __pycache__ *
+recursive-exclude *.pyc *
+recursive-exclude .git *
+recursive-exclude .github *
+recursive-exclude .venv *
+recursive-exclude venv *

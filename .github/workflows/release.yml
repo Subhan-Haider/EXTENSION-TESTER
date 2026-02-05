@@ -1,0 +1,163 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Get version from tag
+      id: get_version
+      run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+    
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Release v${{ steps.get_version.outputs.version }}
+        body: |
+          ## Extension Tester v${{ steps.get_version.outputs.version }}
+          
+          ### 🎉 What's New
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details.
+          
+          ### 📦 Installation
+          
+          **Windows Users:**
+          Download `ExtensionTester.exe` and run directly.
+          
+          **Python Users:**
+          ```bash
+          pip install exttester-${{ steps.get_version.outputs.version }}-py3-none-any.whl
+          ```
+          
+          **From Source:**
+          ```bash
+          pip install exttester-${{ steps.get_version.outputs.version }}.tar.gz
+          ```
+          
+          ### 🔧 Requirements
+          - Windows 10/11 (for .exe)
+          - Python 3.9+ (for wheel/source)
+          - Chrome, Firefox, or Edge browser
+          
+          ### 📚 Documentation
+          - [README](https://github.com/${{ github.repository }}/blob/main/README.md)
+          - [Quick Start](https://github.com/${{ github.repository }}/blob/main/QUICKSTART.md)
+          - [Features](https://github.com/${{ github.repository }}/blob/main/FEATURES.md)
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-windows-exe:
+    needs: create-release
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Build executable
+      run: |
+        pyinstaller ExtensionTester.spec
+    
+    - name: Calculate checksums
+      run: |
+        cd dist
+        certutil -hashfile ExtensionTester.exe SHA256 > ExtensionTester.exe.sha256
+    
+    - name: Upload Windows executable
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/ExtensionTester.exe
+          dist/ExtensionTester.exe.sha256
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-python-package:
+    needs: create-release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install build tools
+      run: |
+        pip install build twine
+    
+    - name: Build package
+      run: |
+        python -m build
+    
+    - name: Check package
+      run: |
+        twine check dist/*
+    
+    - name: Calculate checksums
+      run: |
+        cd dist
+        sha256sum * > checksums.txt
+    
+    - name: Upload Python packages
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          dist/*.whl
+          dist/*.tar.gz
+          dist/checksums.txt
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    # Uncomment to publish to PyPI
+    # - name: Publish to PyPI
+    #   env:
+    #     TWINE_USERNAME: __token__
+    #     TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+    #   run: |
+    #     twine upload dist/*
+
+  update-changelog:
+    needs: [build-windows-exe, build-python-package]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Update release with changelog
+      run: |
+        echo "Release completed successfully!" >> $GITHUB_STEP_SUMMARY
+        echo "- Windows .exe built ✅" >> $GITHUB_STEP_SUMMARY
+        echo "- Python packages built ✅" >> $GITHUB_STEP_SUMMARY
+        echo "- Checksums generated ✅" >> $GITHUB_STEP_SUMMARY
