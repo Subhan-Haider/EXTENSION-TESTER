@@ -1,0 +1,9 @@
+/* Content script styles */
+body {
+  font-family: Arial, sans-serif;
+}
+
+.extension-highlight {
+  background-color: yellow;
+  padding: 5px;
+}

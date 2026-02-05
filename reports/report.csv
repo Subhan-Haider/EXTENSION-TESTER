@@ -1,0 +1,2 @@
+extension,Chrome,Edge,Firefox,Opera,risk_score,security_score,errors,warnings,status
+ext3,FAIL,FAIL,FAIL,FAIL,57,26,4,1,FAIL

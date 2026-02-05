@@ -1,0 +1,220 @@
+╔════════════════════════════════════════════════════════════════════╗
+║     BROWSER EXTENSION TESTER - COMPLETE COMMAND REFERENCE          ║
+╚════════════════════════════════════════════════════════════════════╝
+
+🖥️ GUI MODE (Easiest)
+═══════════════════════════════════════════════════════════════════
+
+  python main.py gui
+
+  Features:
+  ✓ Click to select folder
+  ✓ Check browser boxes
+  ✓ View live results
+  ✓ 3 report tabs
+
+
+🔧 BASIC VALIDATION
+═══════════════════════════════════════════════════════════════════
+
+Test Single Extension:
+  python main.py test C:\path\to\extension
+  python main.py test C:\path\to\extension --browser chrome
+  python main.py test C:\path\to\extension --browser firefox
+
+Test Multiple Extensions:
+  python main.py test-all C:\path\to\extensions\folder
+  python main.py test-all C:\path\to\extensions --browser firefox
+
+
+🧪 ADVANCED TESTING (NEW!)
+═══════════════════════════════════════════════════════════════════
+
+Run All Advanced Tests:
+  python main.py advanced-test C:\path\to\extension
+
+Generate Reports:
+  python main.py advanced-test C:\path\to\extension --format html
+  python main.py advanced-test C:\path\to\extension --format json
+  python main.py advanced-test C:\path\to\extension --format csv
+  python main.py advanced-test C:\path\to\extension --format markdown
+
+Tests Run:
+  ✓ Popup testing
+  ✓ Content script analysis
+  ✓ Background/service worker check
+  ✓ Permission validation
+  ✓ API compatibility check
+
+
+🔍 API COMPATIBILITY (NEW!)
+═══════════════════════════════════════════════════════════════════
+
+Check All Browsers:
+  python main.py check-apis C:\path\to\extension
+
+Check Specific Browser:
+  python main.py check-apis C:\path\to\extension --browser firefox
+  python main.py check-apis C:\path\to\extension --browser chrome
+  python main.py check-apis C:\path\to\extension --browser edge
+  python main.py check-apis C:\path\to\extension --browser opera
+
+Detects:
+  ✗ Chrome-only APIs
+  ✗ Deprecated APIs
+  ✗ Firefox incompatibilities
+  ✓ Suggests fixes
+
+
+📊 REPORT FORMATS
+═══════════════════════════════════════════════════════════════════
+
+HTML Report:
+  - Beautiful styled report
+  - Color-coded results
+  - Open in browser
+  - File: test_report.html
+
+JSON Report:
+  - Machine readable
+  - CI/CD integration
+  - Database compatible
+  - File: test_report.json
+
+CSV Report:
+  - Import to Excel
+  - Spreadsheet compatible
+  - Easy filtering
+  - File: test_report.csv
+
+Markdown Report:
+  - GitHub compatible
+  - Include in README
+  - Human readable
+  - File: test_report.md
+
+
+🎯 COMMON WORKFLOWS
+═══════════════════════════════════════════════════════════════════
+
+Before Publishing:
+  1. python main.py test . --browser all
+  2. python main.py advanced-test . --format html
+  3. python main.py check-apis .
+  4. Open test_report.html and review
+  5. Fix issues, re-test
+
+For Team Review:
+  python main.py advanced-test . --format markdown
+  # Include test_report.md in pull request
+
+For CI Pipeline:
+  python main.py advanced-test . --format json
+  # Parse JSON in build script to pass/fail
+
+For Quick Check:
+  python main.py test .
+  python main.py gui
+
+
+🌐 BROWSER SUPPORT
+═══════════════════════════════════════════════════════════════════
+
+✓ Chrome          MV2 & MV3
+✓ Firefox         WebExtensions (limited MV3)
+✓ Edge            Chromium-based
+✓ Opera           Chromium-based
+
+
+🔧 BROWSER OPTIONS
+═══════════════════════════════════════════════════════════════════
+
+For all commands, use:
+  --browser chrome     (default for single browser)
+  --browser firefox
+  --browser edge
+  --browser opera
+  --browser all        (default for test-all)
+
+
+📋 TESTING CHECKLIST
+═══════════════════════════════════════════════════════════════════
+
+Required Before Publishing:
+
+  □ Run: python main.py test . --browser all
+    ✓ No critical errors
+    ✓ Manifest valid
+    ✓ All files exist
+    ✓ Permissions reasonable
+
+  □ Run: python main.py advanced-test . --format html
+    ✓ Popup loads
+    ✓ Content scripts inject
+    ✓ Background script works
+    ✓ No unsafe patterns
+
+  □ Run: python main.py check-apis . --browser all
+    ✓ No Chrome-only APIs (for cross-browser)
+    ✓ Correct API usage
+    ✓ No deprecated features
+
+  □ Manual testing on actual browsers
+    ✓ Works in Chrome
+    ✓ Works in Firefox (if applicable)
+    ✓ No console errors
+    ✓ Permissions prompt acceptable
+
+
+⚠️ COMMON ISSUES
+═══════════════════════════════════════════════════════════════════
+
+Issue: "File not found" in report
+  → Check manifest references are correct
+  → Verify paths in manifest.json
+
+Issue: Firefox shows as incompatible
+  → Check for chrome-only APIs
+  → Use: python main.py check-apis . --browser firefox
+
+Issue: Content script not injecting
+  → Check match patterns in manifest
+  → Verify content script file exists
+  → Check for timing issues (run_at)
+
+Issue: Report won't open
+  → Ensure HTML file isn't corrupted
+  → Try another format: --format json
+
+
+📚 DOCUMENTATION
+═══════════════════════════════════════════════════════════════════
+
+ADVANCED_FEATURES.md   ← New features guide
+README.md              ← Full documentation
+EXAMPLES.md            ← Usage examples
+QUICKSTART.md          ← Quick reference
+
+
+🎁 QUICK TIPS
+═══════════════════════════════════════════════════════════════════
+
+Tip 1: Always test for all browsers
+  python main.py test . --browser all
+
+Tip 2: Save reports for comparison
+  python main.py advanced-test . --format json > report_latest.json
+
+Tip 3: Use in CI/CD
+  if [ $? -eq 0 ]; then echo "PASS"; else exit 1; fi
+
+Tip 4: Share HTML reports with team
+  # Upload test_report.html to Google Drive/Slack
+
+Tip 5: Check APIs before refactoring
+  python main.py check-apis .
+
+
+═══════════════════════════════════════════════════════════════════
+Ready to test? Start with: python main.py gui
+═══════════════════════════════════════════════════════════════════

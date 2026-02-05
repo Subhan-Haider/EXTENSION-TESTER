@@ -1,0 +1,102 @@
+{
+  "root_folder": "C:\\Users\\setup\\Videos\\ext3",
+  "browsers": [
+    "Chrome",
+    "Edge",
+    "Firefox",
+    "Opera"
+  ],
+  "extensions": {
+    "ext3": {
+      "path": "C:/Users/setup/Videos/ext3",
+      "meta": {
+        "name": "ext3"
+      },
+      "performance": {
+        "total_size_mb": 0.51,
+        "file_count": 126,
+        "js_size_mb": 0.04,
+        "css_size_mb": 0.02,
+        "image_size_mb": 0.1,
+        "largest_file": "icon128.png",
+        "largest_file_mb": 0.06
+      },
+      "security": {
+        "findings": [
+          "Overly broad host permission: <all_urls>",
+          "logo_exporter.html: references remote URL",
+          "logo_lab.html: references remote URL",
+          "logo_renderer.html: references remote URL",
+          "popup.html: references remote URL",
+          "popup.js: uses innerHTML (XSS risk)",
+          "popup.js: references remote URL",
+          "promo_assets.html: references remote URL",
+          "share.html: uses innerHTML (XSS risk)",
+          "share.html: references remote URL",
+          "store_asset_portal.html: references remote URL"
+        ],
+        "permission_findings": [
+          "Permission 'tabs' risk: Medium"
+        ],
+        "permission_risk": "High",
+        "score": 26
+      },
+      "browsers": {
+        "Chrome": {
+          "valid": false,
+          "errors": [
+            "'<all_urls>' in host_permissions is too broad - specify specific hosts"
+          ],
+          "warnings": [],
+          "compatible": [
+            "Chrome",
+            "Edge",
+            "Opera",
+            "Safari"
+          ]
+        },
+        "Firefox": {
+          "valid": false,
+          "errors": [
+            "'<all_urls>' in host_permissions is too broad - specify specific hosts"
+          ],
+          "warnings": [
+            "Firefox has limited Manifest v3 support - test thoroughly"
+          ],
+          "compatible": [
+            "Chrome",
+            "Edge",
+            "Opera",
+            "Safari"
+          ]
+        },
+        "Edge": {
+          "valid": false,
+          "errors": [
+            "'<all_urls>' in host_permissions is too broad - specify specific hosts"
+          ],
+          "warnings": [],
+          "compatible": [
+            "Chrome",
+            "Edge",
+            "Opera",
+            "Safari"
+          ]
+        },
+        "Opera": {
+          "valid": false,
+          "errors": [
+            "'<all_urls>' in host_permissions is too broad - specify specific hosts"
+          ],
+          "warnings": [],
+          "compatible": [
+            "Chrome",
+            "Edge",
+            "Opera",
+            "Safari"
+          ]
+        }
+      }
+    }
+  }
+}
