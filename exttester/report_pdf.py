@@ -1,7 +1,12 @@
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import datetime
 import io
+
+try:
+    from reportlab.graphics.shapes import Drawing
+except ImportError:
+    Drawing = None  # Will be checked at runtime
 
 
 def generate_pdf_report(report: Dict, out_path: str) -> str:
@@ -185,14 +190,14 @@ def generate_pdf_report(report: Dict, out_path: str) -> str:
     return str(path)
 
 
-def _create_pie_chart(summary: Dict) -> Drawing:
+def _create_pie_chart(summary: Dict):
     """Create a pie chart for test results."""
     try:
-        from reportlab.graphics.shapes import Drawing
+        from reportlab.graphics.shapes import Drawing as ChartDrawing
         from reportlab.graphics.charts.piecharts import Pie
         from reportlab.lib import colors
         
-        drawing = Drawing(400, 200)
+        drawing = ChartDrawing(400, 200)
         pie = Pie()
         pie.x = 150
         pie.y = 50
