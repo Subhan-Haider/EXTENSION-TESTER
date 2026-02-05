@@ -171,7 +171,7 @@
       <div>
         <h1 class="title">Extension Test Report</h1>
         <p class="subtitle">Automated QA + security + compatibility report</p>
-        <p class="subtitle muted">Root: C:\Users\setup\Videos\ext3</p>
+        <p class="subtitle muted">Root: C:\Users\setup\OneDrive\Pictures\extenion tester\sample-extension</p>
       </div>
       <div class="badge fail">Critical</div>
     </div>
@@ -189,14 +189,14 @@
         <thead>
           <tr>
             <th>Extension</th>
-            <th>Chrome</th><th>Edge</th><th>Firefox</th><th>Opera</th>
+            <th>Chrome</th><th>Firefox</th><th>Edge</th><th>Opera</th>
             <th>Risk</th>
             <th>Score</th>
             <th>Security</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td><a href="#ext-ext3">ext3</a></td><td><span class="pill fail">FAIL</span></td><td><span class="pill fail">FAIL</span></td><td><span class="pill fail">FAIL</span></td><td><span class="pill fail">FAIL</span></td><td>High</td><td>57</td><td>26</td></tr>
+          <tr><td><a href="#ext-sample-extension">sample-extension</a></td><td><span class="pill fail">FAIL</span></td><td><span class="pill fail">FAIL</span></td><td><span class="pill fail">FAIL</span></td><td><span class="pill fail">FAIL</span></td><td>High</td><td>0</td><td>100</td></tr>
         </tbody>
       </table>
     </div>
@@ -204,65 +204,58 @@
     <div class="section">
       <h3>Per Extension Details</h3>
       
-        <div id="ext-ext3" class="section">
-          <h3>ext3</h3>
+        <div id="ext-sample-extension" class="section">
+          <h3>sample-extension</h3>
           <div class="details-grid">
             <div>
-              <div class="tag">Version: unknown</div>
-              <div class="tag">Manifest: unknown</div>
-              <div class="tag">Size: 0.51 MB</div>
-              <div class="tag">Files: 126</div>
+              <div class="tag">Version: 1.0.0</div>
+              <div class="tag">Manifest: 3</div>
+              <div class="tag">Size: 0.0 MB</div>
+              <div class="tag">Files: 6</div>
             </div>
             <div>
-              <div class="tag">Health Score: 57</div>
+              <div class="tag">Health Score: 0</div>
               <div class="tag">Risk: High</div>
-              <div class="tag">Security Score: 26</div>
-              <div class="meter"><span style="width:57%"></span></div>
+              <div class="tag">Security Score: 100</div>
+              <div class="meter"><span style="width:0%"></span></div>
             </div>
           </div>
           <h4>Test Results</h4>
           <ul>
             <li>Chrome: <strong>FAIL</strong></li>
-<li>Edge: <strong>FAIL</strong></li>
 <li>Firefox: <strong>FAIL</strong></li>
+<li>Edge: <strong>FAIL</strong></li>
 <li>Opera: <strong>FAIL</strong></li>
           </ul>
           <h4>Error Logs</h4>
-          <pre>[Chrome] '<all_urls>' in host_permissions is too broad - specify specific hosts
-[Edge] '<all_urls>' in host_permissions is too broad - specify specific hosts
-[Firefox] '<all_urls>' in host_permissions is too broad - specify specific hosts
-[Opera] '<all_urls>' in host_permissions is too broad - specify specific hosts</pre>
+          <pre>[Chrome] Icon file not found: images/icon-16.png
+[Chrome] Icon file not found: images/icon-48.png
+[Chrome] Icon file not found: images/icon-128.png
+[Firefox] Icon file not found: images/icon-16.png
+[Firefox] Icon file not found: images/icon-48.png
+[Firefox] Icon file not found: images/icon-128.png
+[Edge] Icon file not found: images/icon-16.png
+[Edge] Icon file not found: images/icon-48.png
+[Edge] Icon file not found: images/icon-128.png
+[Opera] Icon file not found: images/icon-16.png
+[Opera] Icon file not found: images/icon-48.png
+[Opera] Icon file not found: images/icon-128.png</pre>
           <h4>Warnings</h4>
           <pre>[Firefox] Firefox has limited Manifest v3 support - test thoroughly</pre>
           <h4>Security Findings</h4>
-          <pre>[Chrome] '<all_urls>' in host_permissions is too broad - specify specific hosts
-[Edge] '<all_urls>' in host_permissions is too broad - specify specific hosts
-[Firefox] '<all_urls>' in host_permissions is too broad - specify specific hosts
-[Opera] '<all_urls>' in host_permissions is too broad - specify specific hosts
-[SECURITY] Overly broad host permission: <all_urls>
-[SECURITY] logo_exporter.html: references remote URL
-[SECURITY] logo_lab.html: references remote URL
-[SECURITY] logo_renderer.html: references remote URL
-[SECURITY] popup.html: references remote URL
-[SECURITY] popup.js: uses innerHTML (XSS risk)
-[SECURITY] popup.js: references remote URL
-[SECURITY] promo_assets.html: references remote URL
-[SECURITY] share.html: uses innerHTML (XSS risk)
-[SECURITY] share.html: references remote URL
-[SECURITY] store_asset_portal.html: references remote URL
-[PERMISSION] Permission 'tabs' risk: Medium</pre>
+          <pre>No high-risk security findings detected.</pre>
           <h4>Compatibility</h4>
           <pre>[Firefox] Not listed as compatible</pre>
           <h4>Performance Metrics</h4>
-          <pre>Size: 0.51 MB
-JS: 0.04 MB
-CSS: 0.02 MB
-Images: 0.1 MB
-Largest File: icon128.png (0.06 MB)</pre>
+          <pre>Size: 0.0 MB
+JS: 0.0 MB
+CSS: 0.0 MB
+Images: 0.0 MB
+Largest File: manifest.json (0.0 MB)</pre>
           <h4>Runtime Results</h4>
           <pre>Not measured in this run.</pre>
           <h4>Screenshots</h4>
-          <pre>Not captured in this run.</pre>
+          <img src="screenshots/sample-extension/popup.png" alt="screenshot" style="max-width:100%; border-radius:8px; margin-top:8px;"/>
         </div>
         
     </div>

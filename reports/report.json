@@ -1,51 +1,43 @@
 {
-  "root_folder": "C:\\Users\\setup\\Videos\\ext3",
+  "root_folder": "C:\\Users\\setup\\OneDrive\\Pictures\\extenion tester\\sample-extension",
   "browsers": [
     "Chrome",
-    "Edge",
     "Firefox",
+    "Edge",
     "Opera"
   ],
   "extensions": {
-    "ext3": {
-      "path": "C:/Users/setup/Videos/ext3",
+    "sample-extension": {
+      "path": "./sample-extension",
       "meta": {
-        "name": "ext3"
+        "name": "Example Extension",
+        "version": "1.0.0",
+        "manifest_version": 3,
+        "file_count": 6,
+        "size_mb": 0.0
       },
       "performance": {
-        "total_size_mb": 0.51,
-        "file_count": 126,
-        "js_size_mb": 0.04,
-        "css_size_mb": 0.02,
-        "image_size_mb": 0.1,
-        "largest_file": "icon128.png",
-        "largest_file_mb": 0.06
+        "total_size_mb": 0.0,
+        "file_count": 6,
+        "js_size_mb": 0.0,
+        "css_size_mb": 0.0,
+        "image_size_mb": 0.0,
+        "largest_file": "manifest.json",
+        "largest_file_mb": 0.0
       },
       "security": {
-        "findings": [
-          "Overly broad host permission: <all_urls>",
-          "logo_exporter.html: references remote URL",
-          "logo_lab.html: references remote URL",
-          "logo_renderer.html: references remote URL",
-          "popup.html: references remote URL",
-          "popup.js: uses innerHTML (XSS risk)",
-          "popup.js: references remote URL",
-          "promo_assets.html: references remote URL",
-          "share.html: uses innerHTML (XSS risk)",
-          "share.html: references remote URL",
-          "store_asset_portal.html: references remote URL"
-        ],
-        "permission_findings": [
-          "Permission 'tabs' risk: Medium"
-        ],
-        "permission_risk": "High",
-        "score": 26
+        "findings": [],
+        "permission_findings": [],
+        "permission_risk": "Low",
+        "score": 100
       },
       "browsers": {
         "Chrome": {
           "valid": false,
           "errors": [
-            "'<all_urls>' in host_permissions is too broad - specify specific hosts"
+            "Icon file not found: images/icon-16.png",
+            "Icon file not found: images/icon-48.png",
+            "Icon file not found: images/icon-128.png"
           ],
           "warnings": [],
           "compatible": [
@@ -58,7 +50,9 @@
         "Firefox": {
           "valid": false,
           "errors": [
-            "'<all_urls>' in host_permissions is too broad - specify specific hosts"
+            "Icon file not found: images/icon-16.png",
+            "Icon file not found: images/icon-48.png",
+            "Icon file not found: images/icon-128.png"
           ],
           "warnings": [
             "Firefox has limited Manifest v3 support - test thoroughly"
@@ -73,7 +67,9 @@
         "Edge": {
           "valid": false,
           "errors": [
-            "'<all_urls>' in host_permissions is too broad - specify specific hosts"
+            "Icon file not found: images/icon-16.png",
+            "Icon file not found: images/icon-48.png",
+            "Icon file not found: images/icon-128.png"
           ],
           "warnings": [],
           "compatible": [
@@ -86,7 +82,9 @@
         "Opera": {
           "valid": false,
           "errors": [
-            "'<all_urls>' in host_permissions is too broad - specify specific hosts"
+            "Icon file not found: images/icon-16.png",
+            "Icon file not found: images/icon-48.png",
+            "Icon file not found: images/icon-128.png"
           ],
           "warnings": [],
           "compatible": [
@@ -96,7 +94,10 @@
             "Safari"
           ]
         }
-      }
+      },
+      "screenshots": [
+        "screenshots/sample-extension/popup.png"
+      ]
     }
   }
 }
