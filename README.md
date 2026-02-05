@@ -1,10 +1,17 @@
-# Browser Extension Testing Platform
+# Browser Extension Testing Platform v1.0
 
 A comprehensive, professional-grade testing and quality assurance platform for browser extensions. Analyze, test, and validate extensions across multiple browsers before submission to app stores.
+
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/Subhan-Haider/EXTENSION-TESTER)
+[![Python](https://img.shields.io/badge/python-3.11+-green.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
+[![Status](https://img.shields.io/badge/status-production-brightgreen.svg)](https://github.com/Subhan-Haider/EXTENSION-TESTER)
 
 ## 🎯 Overview
 
 This platform automates the testing and validation of browser extensions, providing a **6-stage testing pipeline** that covers everything from static analysis to real browser automation. It helps developers catch bugs, security issues, and compatibility problems before submitting to Chrome Web Store, Microsoft Edge Add-ons, and Firefox Add-ons.
+
+**🎉 Now v1.0 Production Ready!**
 
 ## ✨ Features
 
@@ -17,6 +24,7 @@ This platform automates the testing and validation of browser extensions, provid
 - **Dependency Scanning** - Identify bundled libraries and known vulnerabilities
 - **Network Behavior Analysis** - Track external endpoints, detect tracking domains, flag unencrypted requests
 - **Size Analysis** - Extension size breakdown by type with configurable thresholds
+- **NEW: Playwright Engine** - Modern browser automation alternative to Selenium
 
 ### 🏪 Store Compliance
 - **Chrome Web Store Compliance** - Validate against Chrome requirements
@@ -25,23 +33,25 @@ This platform automates the testing and validation of browser extensions, provid
 - **Privacy Policy Scanning** - Data collection detection, policy validation, reachability checking
 
 ### 🌐 Multi-Browser Testing
-- **Real Browser Automation** - Load test extensions in actual browsers
+- **Real Browser Automation** - Load test extensions in actual browsers (Selenium + Playwright)
 - **Cross-Browser Support** - Chrome, Firefox, Edge, and Opera
 - **Per-Browser Testing** - Separate runtime and compatibility tests for each browser
 - **Compatibility Matrix** - Identify browser-specific API compatibility issues
 
 ### 📊 Reporting
-- **HTML Reports** - Beautiful formatted test reports
+- **HTML Reports** - Beautiful formatted test reports with interactive dashboards
 - **JSON Export** - Machine-readable detailed results
 - **CSV Export** - Spreadsheet-compatible data
 - **Markdown Reports** - Version-control friendly documentation
+- **PDF Reports** - Professional reports with charts and recommendations (NEW in v1.0!)
 - **Multi-Format Support** - All formats generated from single test run
 
 ### 💻 User Interface
-- **Command-Line Interface** - Full-featured CLI with Click framework
+- **Command-Line Interface** - Full-featured CLI with 12+ commands
 - **Graphical User Interface** - PyQt5 GUI for visual testing and batch operations
 - **Batch Testing** - Run multiple extensions in parallel
 - **Export Functionality** - Save results in preferred format
+- **Standalone .exe** - Windows executable for easy distribution (NEW!)
 
 ## 🚀 Quick Start
 
@@ -49,6 +59,29 @@ This platform automates the testing and validation of browser extensions, provid
 - **Python 3.11+**
 - **Browsers**: Chrome, Firefox, Edge, or Opera (for automation testing)
 - **Dependencies**: See `requirements.txt`
+
+### Quick Install & Run
+```bash
+# Clone repository
+git clone https://github.com/Subhan-Haider/EXTENSION-TESTER.git
+cd EXTENSION-TESTER
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Optional: Install Playwright browsers
+pip install playwright
+playwright install
+
+# Run tests
+python main.py test ./your-extension
+```
+
+### Or Use the Standalone .exe (Windows)
+```bash
+# Download ExtensionTester.exe from releases
+.\ExtensionTester.exe gui
+```
 
 ### Installation
 
@@ -329,31 +362,78 @@ pip install PyQt5 --upgrade
 
 ## 📈 Future Roadmap
 
-### Planned Features
-- **UI Automation Testing** - Playwright integration for interactive testing
+### v1.1 Planned Features
+- **Enhanced PDF Charts** - Advanced visualization with matplotlib
 - **Screenshot Testing** - Visual regression detection
 - **Accessibility Testing** - ARIA/keyboard navigation validation
 - **Cross-Version Testing** - Multiple browser version support
+- **Video Recording** - Capture test execution videos
+- **Performance Profiling** - Detailed performance analysis
+- **Memory Leak Detection** - Automated memory usage monitoring
+
+### v1.2 Planned Features
 - **Watch Mode** - Auto-retest on file changes
 - **Version Comparison** - Diff between extension versions
-- **Video Recording** - Capture test execution videos
 - **Extension Lifecycle Testing** - Install/update/uninstall workflows
 - **Real User Scenarios** - Browse, shop, watch video simulations
-- **Plugin Architecture** - Custom test plugins
 - **Cloud Testing** - Multi-platform VM testing
+
+### v2.0 Planned Features
+- **Plugin Architecture** - Custom test plugins
 - **Web Dashboard** - Browser-based test management UI
+- **API Server Mode** - RESTful API for remote testing
+- **Distributed Testing** - Multi-machine test execution
 
 ## 📝 License
 
-See LICENSE file for details.
+MIT License - See LICENSE file for details
 
 ## 🤝 Support
 
-For issues or feature requests, please refer to the project documentation or contact the development team.
+For issues or feature requests:
+- 📧 GitHub Issues: https://github.com/Subhan-Haider/EXTENSION-TESTER/issues
+- 📖 Documentation: See QUICKSTART.md, FEATURES.md, PIPELINE_GUIDE.md
+- 💬 Discussions: GitHub Discussions tab
 
 ## 📚 Additional Resources
 
 - [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions/)
+- [Firefox WebExtensions API](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
+- [Edge Extension Development](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/)
+- [Selenium Documentation](https://www.selenium.dev/documentation/)
+- [Playwright Documentation](https://playwright.dev/)
+
+## 🎖️ Project Stats
+
+- **Version**: 1.0.0 (Production Ready)
+- **Python Modules**: 25+
+- **Lines of Code**: 5,500+
+- **Commands Available**: 12
+- **Report Formats**: 5 (HTML, JSON, CSV, MD, PDF)
+- **Browsers Supported**: 4
+- **Security Patterns**: 20+
+- **Last Updated**: February 2026
+
+## 📋 What's New in v1.0
+
+✅ **Complete PDF Report Generator** - Professional reports with charts and recommendations  
+✅ **Playwright Engine** - Modern browser automation alternative  
+✅ **Enhanced CLI** - 12+ commands with comprehensive options  
+✅ **GitHub Actions CI/CD** - Ready-to-use workflow templates  
+✅ **Standalone .exe** - Windows distribution  
+✅ **Production Ready** - All core features complete and tested  
+
+See [CHANGELOG.md](CHANGELOG.md) for full release notes.
+
+---
+
+**Version**: 1.0.0  
+**Last Updated**: February 2026  
+**Status**: ✅ Production Ready  
+**Repository**: https://github.com/Subhan-Haider/EXTENSION-TESTER
+
+Made with ❤️ for browser extension developers worldwide
+
 - [Firefox WebExtensions API](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
 - [Edge Extension Development](https://learn.microsoft.com/en-us/microsoft-edge/extensions-chromium/)
 - [Selenium Documentation](https://www.selenium.dev/documentation/)

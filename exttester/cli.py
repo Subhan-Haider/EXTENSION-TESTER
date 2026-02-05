@@ -486,5 +486,83 @@ def pipeline(path, browser, format):
     return exit_code
 
 
+@cli.command('playwright-test')
+@click.argument('path', type=click.Path(exists=True, file_okay=False, dir_okay=True))
+@click.option('--browser', type=click.Choice(['chromium', 'firefox'], case_sensitive=False),
+              default='chromium', help='Browser to use (default: chromium)')
+@click.option('--urls', multiple=True, 
+              default=('https://www.google.com', 'https://www.github.com'),
+              help='URLs to test')
+@click.option('--headless/--no-headless', default=True, help='Run in headless mode')
+def playwright_test(path, browser, urls, headless):
+    """Test extension using Playwright (modern alternative to Selenium)"""
+    from .playwright_engine import PlaywrightBrowserEngine
+    
+    ext_path = Path(path)
+    
+    click.echo(f"\n{'='*70}")
+    click.echo(f"Playwright Extension Test: {ext_path.name}")
+    click.echo(f"Browser: {browser}")
+    click.echo(f"Mode: {'Headless' if headless else 'GUI'}")
+    click.echo(f"{'='*70}\n")
+    
+    engine = PlaywrightBrowserEngine(ext_path)
+    
+    # Run basic load test
+    click.echo("Running extension load test...")
+    load_results = engine.test_extension_load(browser, headless)
+    
+    if load_results.get('success'):
+        click.secho("✓ Extension loaded successfully", fg='green', bold=True)
+    else:
+        click.secho("✗ Extension failed to load", fg='red', bold=True)
+        if 'error' in load_results:
+            click.echo(f"  Error: {load_results['error']}")
+    
+    # Display console logs
+    if load_results.get('console_logs'):
+        click.echo("\nConsole Logs:")
+        for log in load_results['console_logs'][:10]:
+            click.echo(f"  [{log.get('type', 'log')}] {log.get('text', '')}")
+    
+    # Display errors
+    if load_results.get('errors'):
+        click.secho("\nErrors Detected:", fg='red', bold=True)
+        for error in load_results['errors']:
+            click.echo(f"  • {error}")
+    
+    # Run advanced tests
+    if len(urls) > 0:
+        click.echo(f"\nRunning advanced tests on {len(urls)} URL(s)...")
+        advanced_results = engine.run_advanced_tests(browser, list(urls))
+        
+        click.echo(f"\nTest Results:")
+        click.echo(f"  Passed: {advanced_results.get('passed', 0)}")
+        click.echo(f"  Failed: {advanced_results.get('failed', 0)}")
+        click.echo(f"  Total Errors: {advanced_results.get('total_errors', 0)}")
+        
+        for test_result in advanced_results.get('test_results', []):
+            url = test_result.get('url', 'unknown')
+            success = test_result.get('success', False)
+            load_time = test_result.get('load_time', 0)
+            
+            if success:
+                click.secho(f"  ✓ {url} ({load_time:.2f}s)", fg='green')
+            else:
+                click.secho(f"  ✗ {url}", fg='red')
+    
+    # Test popup if exists
+    click.echo("\nTesting popup page...")
+    popup_results = engine.test_popup(browser)
+    
+    if popup_results.get('success'):
+        click.secho("✓ Popup test passed", fg='green')
+    elif 'error' in popup_results:
+        click.echo(f"  {popup_results['error']}")
+    
+    click.echo(f"\n{'='*70}\n")
+
+
 if __name__ == '__main__':
     cli()
+
