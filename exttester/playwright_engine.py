@@ -18,23 +18,16 @@ class PlaywrightBrowserEngine:
         self.extension_path = extension_path
         self.supported_browsers = ['chromium', 'firefox']  # Playwright naming
         
-    def test_extension_load(self, browser='chromium', headless=True) -> Dict:
+    def test_extension_load(self, browser='chromium', headless=False) -> Dict:
         """
-        Load extension in browser using Playwright.
-        
-        Args:
-            browser: Browser type ('chromium' or 'firefox')
-            headless: Run in headless mode
-            
-        Returns:
-            Dict with test results
+        Load extension in browser using Playwright with persistent context.
         """
         try:
             from playwright.sync_api import sync_playwright
         except ImportError:
             return {
                 'success': False,
-                'error': 'Playwright not installed. Run: pip install playwright && playwright install',
+                'error': 'Playwright not installed.',
                 'console_logs': [],
                 'errors': []
             }
@@ -44,32 +37,41 @@ class PlaywrightBrowserEngine:
             'console_logs': [],
             'errors': [],
             'screenshots': [],
-            'load_time': 0
+            'load_time': 0,
+            'browser': browser
         }
+        
+        import tempfile
+        import shutil
+        user_data_dir = tempfile.mkdtemp(prefix=f"ext_tester_{browser}_")
         
         try:
             with sync_playwright() as p:
-                # Launch browser
+                launch_args = [
+                    f"--disable-extensions-except={self.extension_path}",
+                    f"--load-extension={self.extension_path}",
+                ]
+                
+                # Launch with persistent context for real extension behavior
                 if browser == 'chromium':
-                    browser_instance = p.chromium.launch(
+                    context = p.chromium.launch_persistent_context(
+                        user_data_dir=user_data_dir,
                         headless=headless,
-                        args=[
-                            f'--disable-extensions-except={self.extension_path}',
-                            f'--load-extension={self.extension_path}'
-                        ]
+                        args=launch_args
                     )
                 elif browser == 'firefox':
-                    # Firefox extension loading is different
-                    browser_instance = p.firefox.launch(headless=headless)
+                    # Firefox uses different loading mechanism
+                    context = p.firefox.launch_persistent_context(
+                        user_data_dir=user_data_dir,
+                        headless=headless
+                    )
                 else:
                     results['error'] = f'Unsupported browser: {browser}'
                     return results
-                
-                # Create context and page
-                context = browser_instance.new_context()
+
                 page = context.new_page()
                 
-                # Capture console messages
+                # Capture console messages as specified in the guide
                 page.on("console", lambda msg: results['console_logs'].append({
                     'type': msg.type,
                     'text': msg.text
@@ -81,35 +83,37 @@ class PlaywrightBrowserEngine:
                 # Capture network failures
                 page.on("requestfailed", lambda req: results['errors'].append(f"Network fail: {req.url} - {req.failure}"))
                 
-                # Navigate to test page
-                try:
-                    page.goto('https://www.google.com', timeout=10000)
-                    page.wait_for_load_state('networkidle', timeout=5000)
-                    results['success'] = True
-                except Exception as e:
-                    results['errors'].append(f'Navigation error: {str(e)}')
+                # Step 4: Open test websites
+                test_sites = ['https://example.com', 'https://www.wikipedia.org']
+                for site in test_sites:
+                    try:
+                        logger.info(f"Testing extension on {site}")
+                        page.goto(site, timeout=15000)
+                        page.wait_for_timeout(3000) # Wait for content scripts to settle
+                        
+                        # Step 6: Take screenshots
+                        screenshot_path = Path('reports/screenshots') / f"{browser}_{site.replace('https://', '').replace('/', '_')}.png"
+                        screenshot_path.parent.mkdir(parents=True, exist_ok=True)
+                        page.screenshot(path=str(screenshot_path))
+                        results['screenshots'].append(str(screenshot_path))
+                        
+                    except Exception as e:
+                        results['errors'].append(f'Error on {site}: {str(e)}')
                 
-                # Check if extension loaded
-                extension_loaded = self._check_extension_loaded(page)
-                results['extension_loaded'] = extension_loaded
-
-                # Inject a script to check for content script side-effects if applicable
-                # (Optional: check for specific element injected by content script)
+                # Check extension ID and load status
+                results['extension_loaded'] = self._check_extension_loaded(page)
+                results['success'] = results['extension_loaded']
                 
-                # Take screenshot
-                screenshot_path = Path('reports/screenshots') / f'{self.extension_path.name}_{browser}.png'
-                screenshot_path.parent.mkdir(parents=True, exist_ok=True)
-                page.screenshot(path=str(screenshot_path))
-                results['screenshots'].append(str(screenshot_path))
-                
-                # Close
                 context.close()
-                browser_instance.close()
                 
         except Exception as e:
             results['error'] = str(e)
             results['success'] = False
             logger.error(f"Playwright test error: {e}")
+        finally:
+            # Clean up profile
+            if Path(user_data_dir).exists():
+                shutil.rmtree(user_data_dir, ignore_errors=True)
         
         return results
     
