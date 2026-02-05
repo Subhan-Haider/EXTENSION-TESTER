@@ -1,2 +1,2 @@
 extension,Chrome,Firefox,Edge,Opera,risk_score,security_score,errors,warnings,status
-sample-extension,FAIL,FAIL,FAIL,FAIL,0,100,12,1,FAIL
+sample-extension,FAIL,FAIL,FAIL,FAIL,0,94,12,1,FAIL

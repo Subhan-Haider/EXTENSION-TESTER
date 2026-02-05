@@ -26,10 +26,12 @@
         "largest_file_mb": 0.0
       },
       "security": {
-        "findings": [],
+        "findings": [
+          "Sensitive permissions used (storage). Ensure you have a Privacy Policy."
+        ],
         "permission_findings": [],
-        "permission_risk": "Low",
-        "score": 100
+        "permission_risk": "Medium",
+        "score": 94
       },
       "browsers": {
         "Chrome": {

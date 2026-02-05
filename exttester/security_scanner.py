@@ -59,6 +59,16 @@ def scan_extension(extension_path: str) -> Dict:
         findings.append("CSP allows 'unsafe-inline'")
         permission_risk = _max_risk(permission_risk, "Medium")
 
+    # Privacy Policy Check
+    # If using sensitive permissions, a privacy policy is generally required by stores
+    sensitive_perms = {"storage", "cookies", "history", "identity", "bookmarks", "management"}
+    used_sensitive = set(permissions).intersection(sensitive_perms)
+    if used_sensitive or host_permissions:
+        # Check if privacy policy is mentioned in manifest (some non-standard fields) or if user provided url
+        # Strictly speaking, the manifest doesn't hold the policy URL for Chrome, but we can warn the user.
+        findings.append(f"Sensitive permissions used ({', '.join(used_sensitive)}). Ensure you have a Privacy Policy.")
+        permission_risk = _max_risk(permission_risk, "Medium")
+
     # Source code checks
     code_findings = _scan_source_files(path)
     findings.extend(code_findings)
