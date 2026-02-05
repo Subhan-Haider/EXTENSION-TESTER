@@ -72,6 +72,8 @@ class TestingPipeline:
         from .linter import ExtensionLinter
         from .browser_tester import ExtensionBrowserTester
         from .api_checker import APICompatibilityChecker
+        from .scoring_engine import ScoringEngine
+        from .vulnerability_scanner import scan_for_vulnerabilities
         
         # Stage 1: Static File Checks
         stage1 = self._run_stage(1, 'Static File Checks', 'Verify all required files exist',
