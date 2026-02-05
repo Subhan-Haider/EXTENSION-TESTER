@@ -28,9 +28,19 @@ jobs:
 
     - name: Run Unit Tests
       run: |
-        python -m unittest discover tests
+        python -m unittest discover tests -p "test_*.py" -v
 
-    - name: Code Linting
+    - name: Run Integration Tests
       run: |
-        # Optional: Add pylint or flake8 here
-        echo "Linting complete"
+        python tests/test_integration.py
+
+    - name: Test CLI Commands
+      run: |
+        python main.py --help
+        echo "CLI help command works ✓"
+
+    - name: Code Linting (Optional)
+      continue-on-error: true
+      run: |
+        pip install pylint || true
+        pylint exttester/*.py --exit-zero || echo "Linting complete"
