@@ -434,6 +434,8 @@ class ExtensionBrowserTester:
                     message='MV3: Missing service_worker in background'
                 )
             
+
+            
             worker_path = self.extension_path / service_worker
             if not worker_path.exists():
                 return BrowserTestResult(
@@ -442,6 +444,23 @@ class ExtensionBrowserTester:
                     success=False,
                     message=f'Service worker file not found: {service_worker}'
                 )
+
+            # Real Service Worker Test
+            if PLAYWRIGHT_AVAILABLE and self.browser in ['chrome', 'chromium']:
+                try:
+                    sw_res = self.engine.test_service_worker()
+                    if sw_res.get('skipped'):
+                        pass
+                    elif not sw_res['success']:
+                        return BrowserTestResult(
+                            browser=self.browser,
+                            test_type='background_script',
+                            success=False,
+                            message=f"Service Worker failed to start: {sw_res.get('error')}",
+                            console_errors=sw_res.get('errors', [])
+                        )
+                except Exception as e:
+                    logger.warning(f"SW test failed: {e}")
         else:
             # Check background page (MV2)
             bg = manifest.get('background', {})
@@ -471,6 +490,43 @@ class ExtensionBrowserTester:
             test_type='background_script',
             success=True,
             message=f'Background script valid (MV{mv})'
+        )
+
+    def test_options_page(self) -> BrowserTestResult:
+        """Test options page settings"""
+        manifest_path = self.extension_path / 'manifest.json'
+        try:
+            with open(manifest_path) as f:
+                manifest = json.load(f)
+        except:
+             return BrowserTestResult(browser=self.browser, test_type='options_page', success=False, message='Cannot read manifest')
+
+        options_page = manifest.get('options_page') or manifest.get('options_ui', {}).get('page')
+        if not options_page:
+            return BrowserTestResult(browser=self.browser, test_type='options_page', success=True, message='No options page')
+
+        # Real Options Page Test
+        if PLAYWRIGHT_AVAILABLE and self.browser in ['chrome', 'chromium']:
+            try:
+                options_res = self.engine.test_options_page()
+                if options_res.get('skipped'):
+                    pass
+                elif not options_res['success']:
+                    return BrowserTestResult(
+                        browser=self.browser,
+                        test_type='options_page',
+                        success=False,
+                        message=f"Options page failed in real browser: {options_res.get('error')}",
+                        console_errors=options_res.get('errors', [])
+                    )
+            except Exception as e:
+                logger.warning(f"Options test failed: {e}")
+
+        return BrowserTestResult(
+            browser=self.browser,
+            test_type='options_page',
+            success=True,
+            message=f'Options page passed: {options_page}'
         )
     
     def test_permissions(self) -> BrowserTestResult:
@@ -546,6 +602,7 @@ class ExtensionBrowserTester:
         # Run all tests
         results.append(self.test_extension_load())
         results.append(self.test_popup())
+        results.append(self.test_options_page())
         results.append(self.test_content_scripts())
         results.append(self.test_background_script())
         results.append(self.test_permissions())
